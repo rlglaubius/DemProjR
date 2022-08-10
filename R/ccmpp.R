@@ -42,7 +42,7 @@ ccmpp_migr_mid = function(par) {
 }
 
 ## CCMPP that adds net migrants at the end of each period
-ccmpp_migr_mid = function(par) {
+ccmpp_migr_end = function(par) {
   n_dim = dim(par$migr)
   n_yrs = n_dim[1]
   n_sex = n_dim[2]
@@ -84,8 +84,17 @@ ccmpp_migr_mid = function(par) {
 }
 
 #' Calculate a demographic projection
-#' 
-#' @param par 
+#'
+#' @param par inputs as prepared by \code{read_upd}
+#' @param proj.method the CCMPP function to use, either \code{ccmpp_migr_mid}
+#'   for mid-period net migration or \code{ccmpp_migr_end} for end-period net
+#'   migration
+#' @param spec.fert If \code{spec.fert=FALSE}, then proportionate age-specific
+#'   fertility \code{par$pasfrs} is used as-is. If \code{spec.fert=TRUE},
+#'   age-specific fertility is aggregated to five-year age groups, then assumed
+#'   uniform within those age groups during model projection as in Spectrum. By
+#'   default, \code{spec.fert=FALSE}.
+#' @export
 demproj = function(par, proj.method, spec.fert=FALSE) {
   years = par$tfr$year
   year_first = min(years)
