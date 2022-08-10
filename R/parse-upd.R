@@ -7,7 +7,7 @@
 ## srb: sex ratio at birth by year
 ## pasfrs: proportional age-specific fertility rates by year and age
 ## migr: net number of migrants by year, sex and age
-parse.upd = function(filename) {
+read_upd = function(filename) {
   parse.block = function(raw, tag) {
     tag.bgn = sprintf("<%s>", tag)
     tag.end = sprintf("</%s>", tag)
