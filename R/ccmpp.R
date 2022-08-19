@@ -110,7 +110,7 @@ demproj = function(par, proj.method, spec.fert=FALSE) {
   
   par_list = list(
     years   = years,
-    basepop = matrix(par$base.pop$value, nrow=2, ncol=n_age, byrow=TRUE),
+    basepop = matrix(par$base.pop$value[par$base.pop$year==year_first], nrow=2, ncol=n_age, byrow=TRUE),
     tfr     = par$tfr$value,
     srb     = par$srb$value,
     pasfrs  = matrix(par$pasfrs$value, nrow=n_yrs, ncol=n_age_fert, byrow=TRUE),
