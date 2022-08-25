@@ -13,7 +13,12 @@ ccmpp_migr_mid = function(par) {
   deaths = array(NA, dim=c(n_yrs, n_sex, n_age), dimnames=list(Year=par$years, Sex=lab_sex, Age=lab_age))
   
   pop[1,,] = par$basepop
-  btotal = sum(0.5 * (pop[1,2,16:50] + pop[1,2,15:49] * par$Sx[1,2,15:49]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
+  
+  if (exists("births", where=par)) {
+    btotal = par$births[1]
+  } else {
+    btotal = sum(0.5 * (pop[1,2,16:50] + pop[1,2,15:49] * par$Sx[1,2,15:49]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
+  }
   births[1,1] = btotal * par$srb[1] / (100.0 + par$srb[1])
   births[1,2] = btotal - births[1,1]
   
@@ -30,7 +35,11 @@ ccmpp_migr_mid = function(par) {
     
     # birth to age 0
     mr = 0.5 * par$migr[k,,1]
-    btotal = sum(0.5 * (pop[k,2,16:50] + pop[k-1,2,16:50]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
+    if (exists("births", where=par)) {
+      btotal = par$births[k]
+    } else {
+      btotal = sum(0.5 * (pop[k,2,16:50] + pop[k-1,2,16:50]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
+    }
     births[k,1] = btotal * par$srb[k] / (100.0 + par$srb[k])
     births[k,2] = btotal - births[k,1]
     deaths[k,,1] = births[k,] * (1.0 - par$Sx[k,,1]) + mr * (2.0 * (1.0 - par$Sx[k,,1])) / 3.0
@@ -56,9 +65,16 @@ ccmpp_migr_end = function(par) {
   deaths = array(NA, dim=c(n_yrs, n_sex, n_age), dimnames=list(Year=par$years, Sex=lab_sex, Age=lab_age))
   
   pop[1,,] = par$basepop
-  btotal = sum(0.5 * (pop[1,2,16:50] + pop[1,2,15:49] * par$Sx[1,2,15:49]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
+  
+  if (exists("births", where=par)) {
+    btotal = par$births[1]
+  } else {
+    btotal = sum(0.5 * (pop[1,2,16:50] + pop[1,2,15:49] * par$Sx[1,2,15:49]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
+  }
+  
   births[1,1] = btotal * par$srb[1] / (100.0 + par$srb[1])
   births[1,2] = btotal - births[1,1]
+  
 
   for (k in 2:length(par$years)) {
     # ages 1-79 -> 2-80
@@ -69,10 +85,15 @@ ccmpp_migr_end = function(par) {
     deaths[k,,n_age] = deaths[k,,n_age] + pop[k-1,,n_age] * (1.0 - par$Sx[k,,n_age+1])
     pop[k,,n_age] = pop[k,,n_age] + pop[k-1,,n_age] * par$Sx[k,,n_age+1]
     
-    # birth to age 0
-    btotal = sum(0.5 * (pop[k,2,16:50] + pop[k-1,2,16:50]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
+    if (exists("births", where=par)) {
+      btotal = par$births[k]
+    } else {
+      btotal = sum(0.5 * (pop[k,2,16:50] + pop[k-1,2,16:50]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
+    }
+    
     births[k,1] = btotal * par$srb[k] / (100.0 + par$srb[k])
     births[k,2] = btotal - births[k,1]
+    
     deaths[k,,1] = births[k,] * (1.0 - par$Sx[k,,1])
     pop[k,,1] = births[k,] * par$Sx[k,,1]
     
@@ -117,6 +138,11 @@ demproj = function(par, proj.method, spec.fert=FALSE) {
     Sx      = aperm(array(par$life.table$Sx, dim=c(n_age+1, n_sex, n_yrs), dimnames=list(Age=c("B", lab_age), Sex=lab_sex, Year=years)), 3:1),
     migr    = aperm(array(par$migr$value, dim=c(n_age, n_sex, n_yrs), dimnames=list(Age=lab_age, Sex=lab_sex, Year=years)), 3:1)
   )
+  
+  ## Check if births are provided as an input
+  if (exists("births", where=par)) {
+    par_list$births = par$births$value
+  }
   
   ## Spectrum aggregates PASFRs to five-year age groups, then assumes
   ## age-specific fertility = 20% of the corresponding five-year age group
