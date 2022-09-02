@@ -1,4 +1,5 @@
 ## CCMPP that spreads net migrants uniformly throughout each period
+#' @export
 ccmpp_migr_mid = function(par) {
   n_dim = dim(par$migr)
   n_yrs = n_dim[1]
@@ -51,6 +52,7 @@ ccmpp_migr_mid = function(par) {
 }
 
 ## CCMPP that adds net migrants at the end of each period
+#' @export
 ccmpp_migr_end = function(par) {
   n_dim = dim(par$migr)
   n_yrs = n_dim[1]
@@ -114,9 +116,9 @@ ccmpp_migr_end = function(par) {
 #'   fertility \code{par$pasfrs} is used as-is. If \code{spec.fert=TRUE},
 #'   age-specific fertility is aggregated to five-year age groups, then assumed
 #'   uniform within those age groups during model projection as in Spectrum. By
-#'   default, \code{spec.fert=FALSE}.
+#'   default, \code{spec.fert=TRUE}.
 #' @export
-demproj = function(par, proj.method, spec.fert=FALSE) {
+demproj = function(par, proj.method=ccmpp_migr_mid, spec.fert=TRUE) {
   years = par$tfr$year
   year_first = min(years)
   year_final = max(years)
@@ -124,17 +126,26 @@ demproj = function(par, proj.method, spec.fert=FALSE) {
   n_yrs = length(years)
   n_sex = 2
   n_age = 81
-  n_age_fert = 49-15+1
   
   lab_sex = c("Male", "Female")
   lab_age = c(0:79, "80+")
+  
+  fert_span = range(par$pasfrs$age)
+  if (fert_span == c(10,54)) {
+    pasfrs = matrix(par$pasfrs$value, nrow=n_yrs, ncol=fert_span[2]-fert_span[1]+1, byrow=TRUE)
+  } else if (fert_span == c(15,49)) {
+    pasfrs = matrix(0.0, nrow=n_yrs, ncol=54-10+1)
+    pasfrs[,6:40] = matrix(par$pasfrs$value, nrow=n_yrs, ncol=fert_span[2]-fert_span[1]+1, byrow=TRUE)
+  } else {
+    stop(sprintf("Unsupported reproductive age range %d-%d, 15-49 or 10-54 expected", fert_span[1], fert_span[2]))
+  }
   
   par_list = list(
     years   = years,
     basepop = matrix(par$base.pop$value[par$base.pop$year==year_first], nrow=2, ncol=n_age, byrow=TRUE),
     tfr     = par$tfr$value,
     srb     = par$srb$value,
-    pasfrs  = matrix(par$pasfrs$value, nrow=n_yrs, ncol=n_age_fert, byrow=TRUE),
+    pasfrs  = pafrs,
     Sx      = aperm(array(par$life.table$Sx, dim=c(n_age+1, n_sex, n_yrs), dimnames=list(Age=c("B", lab_age), Sex=lab_sex, Year=years)), 3:1),
     migr    = aperm(array(par$migr$value, dim=c(n_age, n_sex, n_yrs), dimnames=list(Age=lab_age, Sex=lab_sex, Year=years)), 3:1)
   )
