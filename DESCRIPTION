@@ -10,5 +10,6 @@ Description: Spectrum is a suite of policy models used to support decision makin
   of DemProj.
 License: MIT
 Encoding: UTF-8
+Imports: Matrix
 LazyData: true
 RoxygenNote: 7.2.1

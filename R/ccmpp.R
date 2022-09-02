@@ -18,7 +18,7 @@ ccmpp_migr_mid = function(par) {
   if (exists("births", where=par)) {
     btotal = par$births[1]
   } else {
-    btotal = sum(0.5 * (pop[1,2,16:50] + pop[1,2,15:49] * par$Sx[1,2,15:49]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
+    btotal = sum(0.5 * (pop[1,2,11:55] + pop[1,2,10:54] * par$Sx[1,2,10:54]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
   }
   births[1,1] = btotal * par$srb[1] / (100.0 + par$srb[1])
   births[1,2] = btotal - births[1,1]
@@ -39,7 +39,7 @@ ccmpp_migr_mid = function(par) {
     if (exists("births", where=par)) {
       btotal = par$births[k]
     } else {
-      btotal = sum(0.5 * (pop[k,2,16:50] + pop[k-1,2,16:50]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
+      btotal = sum(0.5 * (pop[k,2,11:55] + pop[k-1,2,11:55]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
     }
     births[k,1] = btotal * par$srb[k] / (100.0 + par$srb[k])
     births[k,2] = btotal - births[k,1]
@@ -71,7 +71,7 @@ ccmpp_migr_end = function(par) {
   if (exists("births", where=par)) {
     btotal = par$births[1]
   } else {
-    btotal = sum(0.5 * (pop[1,2,16:50] + pop[1,2,15:49] * par$Sx[1,2,15:49]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
+    btotal = sum(0.5 * (pop[1,2,11:55] + pop[1,2,10:54] * par$Sx[1,2,10:54]) * par$tfr[1] * par$pasfr[1,] / sum(par$pasfr[1,]))
   }
   
   births[1,1] = btotal * par$srb[1] / (100.0 + par$srb[1])
@@ -90,7 +90,7 @@ ccmpp_migr_end = function(par) {
     if (exists("births", where=par)) {
       btotal = par$births[k]
     } else {
-      btotal = sum(0.5 * (pop[k,2,16:50] + pop[k-1,2,16:50]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
+      btotal = sum(0.5 * (pop[k,2,11:55] + pop[k-1,2,11:55]) * par$tfr[k] * par$pasfr[k,]) / sum(par$pasfr[k,])
     }
     
     births[k,1] = btotal * par$srb[k] / (100.0 + par$srb[k])
@@ -131,9 +131,9 @@ demproj = function(par, proj.method=ccmpp_migr_mid, spec.fert=TRUE) {
   lab_age = c(0:79, "80+")
   
   fert_span = range(par$pasfrs$age)
-  if (fert_span == c(10,54)) {
+  if (all(fert_span == c(10,54))) {
     pasfrs = matrix(par$pasfrs$value, nrow=n_yrs, ncol=fert_span[2]-fert_span[1]+1, byrow=TRUE)
-  } else if (fert_span == c(15,49)) {
+  } else if (all(fert_span == c(15,49))) {
     pasfrs = matrix(0.0, nrow=n_yrs, ncol=54-10+1)
     pasfrs[,6:40] = matrix(par$pasfrs$value, nrow=n_yrs, ncol=fert_span[2]-fert_span[1]+1, byrow=TRUE)
   } else {
@@ -145,7 +145,7 @@ demproj = function(par, proj.method=ccmpp_migr_mid, spec.fert=TRUE) {
     basepop = matrix(par$base.pop$value[par$base.pop$year==year_first], nrow=2, ncol=n_age, byrow=TRUE),
     tfr     = par$tfr$value,
     srb     = par$srb$value,
-    pasfrs  = pafrs,
+    pasfrs  = pasfrs,
     Sx      = aperm(array(par$life.table$Sx, dim=c(n_age+1, n_sex, n_yrs), dimnames=list(Age=c("B", lab_age), Sex=lab_sex, Year=years)), 3:1),
     migr    = aperm(array(par$migr$value, dim=c(n_age, n_sex, n_yrs), dimnames=list(Age=lab_age, Sex=lab_sex, Year=years)), 3:1)
   )
@@ -155,17 +155,11 @@ demproj = function(par, proj.method=ccmpp_migr_mid, spec.fert=TRUE) {
     par_list$births = par$births$value
   }
   
-  ## Spectrum aggregates PASFRs to five-year age groups, then assumes
-  ## age-specific fertility = 20% of the corresponding five-year age group
-  ## fertility
-  if (spec.fert) { 
-    par_list$pasfrs[, 1:5 ] = 0.2 * matrix(rowSums(par_list$pasfrs[, 1:5 ]), nrow=n_yrs, ncol=5) # 15-19
-    par_list$pasfrs[, 6:10] = 0.2 * matrix(rowSums(par_list$pasfrs[, 6:10]), nrow=n_yrs, ncol=5) # 20-24
-    par_list$pasfrs[,11:15] = 0.2 * matrix(rowSums(par_list$pasfrs[,11:15]), nrow=n_yrs, ncol=5) # 25-29
-    par_list$pasfrs[,16:20] = 0.2 * matrix(rowSums(par_list$pasfrs[,16:20]), nrow=n_yrs, ncol=5) # 30-34
-    par_list$pasfrs[,21:25] = 0.2 * matrix(rowSums(par_list$pasfrs[,21:25]), nrow=n_yrs, ncol=5) # 35-39
-    par_list$pasfrs[,26:30] = 0.2 * matrix(rowSums(par_list$pasfrs[,26:30]), nrow=n_yrs, ncol=5) # 40-44
-    par_list$pasfrs[,31:35] = 0.2 * matrix(rowSums(par_list$pasfrs[,31:35]), nrow=n_yrs, ncol=5) # 45-49
+  ## Spectrum flattens age-specific fertility by five year age group
+  if (spec.fert) {
+    block_num = (54 - 10 + 1) %/% 5 #
+    block_mat = Matrix::bdiag(replicate(block_num, matrix(0.2, nrow=5, ncol=5), simplify=FALSE))
+    par_list$pasfrs = as.matrix(pasfrs %*% block_mat)
   }
   
   rval = proj.method(par_list)
