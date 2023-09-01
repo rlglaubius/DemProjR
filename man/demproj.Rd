@@ -25,6 +25,14 @@ age-specific fertility is aggregated to five-year age groups, then assumed
 uniform within those age groups during model projection as in Spectrum. By
 default, \code{spec.fert=TRUE}.}
 }
+\value{
+Returns a list containing
+ \enumerate{
+ \item{pop - an array of projected estimates by year, sex (1:male, 2:female) and age. The maximum age corresponds to the open 80+ age group.}
+ \item{births - an array of births by year and child's sex.}
+ \item{deaths - an array of projected deaths by year, sex, and age.}
+ }
+}
 \description{
 Calculate a demographic projection
 }
