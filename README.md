@@ -16,6 +16,7 @@ Once you have DemProjR installed, you can run a projection using the example dem
 > proj = demproj(par, proj.method=ccmpp_migr_end, spec.fert=TRUE)
 ```
 
+## Getting demographic input files
 If you have Spectrum installed, you can find other UPD files with demographic inputs in
 the Avenir Health `%appdata%` folder. This will be something like `C:/Users/<UserName>/AppData/Roaming/Avenir Health/Spectrum/UNPopDataByCountry`.
 UPD files are based on regular releases of the United Nations Population Division World Population Prospects (WPP), and stored in folders by revision (e.g., `2022` for the 2022 WPP revision). If you do not see the country you are looking for, you can download these from within in Spectrum, or directly from [Avenir Health's Country Data Pack](https://avenirhealth.org/software-spectrum.php). If you downloaded these from within Spectrum, but don't have a folder for WPP 2022, you may need to install a more recent version of Spectrum. We recommend Spectrum version 6.29 or later.
