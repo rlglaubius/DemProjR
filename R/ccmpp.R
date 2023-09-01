@@ -1,4 +1,4 @@
-## CCMPP that spreads net migrants uniformly throughout each period
+#' @describeIn demproj CCMPP that spreads net migrants uniformly throughout each period
 #' @export
 ccmpp_migr_mid = function(par) {
   n_dim = dim(par$migr)
@@ -51,7 +51,7 @@ ccmpp_migr_mid = function(par) {
   return(rval)
 }
 
-## CCMPP that adds net migrants at the end of each period
+#' @describeIn demproj CCMPP that spreads net migrants at the end of each period
 #' @export
 ccmpp_migr_end = function(par) {
   n_dim = dim(par$migr)
@@ -108,7 +108,7 @@ ccmpp_migr_end = function(par) {
 
 #' Calculate a demographic projection
 #'
-#' @param par inputs as prepared by \code{read_upd}
+#' @param par demographic inputs as prepared by \code{read_upd}
 #' @param proj.method the CCMPP function to use, either \code{ccmpp_migr_mid}
 #'   for mid-period net migration or \code{ccmpp_migr_end} for end-period net
 #'   migration
@@ -117,6 +117,23 @@ ccmpp_migr_end = function(par) {
 #'   age-specific fertility is aggregated to five-year age groups, then assumed
 #'   uniform within those age groups during model projection as in Spectrum. By
 #'   default, \code{spec.fert=TRUE}.
+#' @details This implementation is intended to replicate the demographic
+#'   projection calculations done in the Spectrum software suite, which in turn
+#'   is based on methods used by the United Nations Population Division to
+#'   produce its World Population Prospects (WPP).
+#'
+#'   The 2022 WPP revision used end period net migration. Previous WPP revisions
+#'   used mid-period net migration. For consistency with WPP, Spectrum used
+#'   mid-period net migration prior to Spectrum version 6.19. Since version 6.20
+#'   released in 2022, Spectrum has used end-period net migration.
+#'
+#'   Please note that Spectrum handles net migration inputs differently than
+#'   DemProjR. DemProjR uses net migration inputs as specified in par$migr
+#'   exactly. To simplify its user interface, net migration in Spectrum is
+#'   entered by five-year age groups, then disaggregated to single ages during
+#'   projection. This may cause small differences in population projections
+#'   between Spectrum and DemProjR.
+#'
 #' @export
 demproj = function(par, proj.method=ccmpp_migr_mid, spec.fert=TRUE) {
   years = par$tfr$year
